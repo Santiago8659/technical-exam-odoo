@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Invoice Payment Behavior View -->
+        <record id="account_move_view_from_inherit_payment_behavior" model="ir.ui.view">
+            <field name="name">account.move.view.form.inherit.payment.behavior</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@id='header_right_group']/div[2]" position="after">
+                    <field name="invoice_net_date_due" attrs="{'invisible': [('move_type', '!=', 'out_invoice')]}"/>
+                    <field name="payment_date" attrs="{'invisible': ['|',('move_type', '!=', 'out_invoice'),('payment_state','not in',['paid','in_payment'])]}"/>
+                    <label for="days_to_pay" string="Days to Pay" attrs="{'invisible':['|',('move_type','!=','out_invoice'),('payment_state','not in',('paid','in_payment'))]}"/>
+                    <div class="o_row" attrs="{'invisible':['|',('move_type','!=','out_invoice'),('payment_state','not in',('paid','in_payment'))]}">
+                        <field name="days_to_pay"/>
+                        <span class="oe_read_only"> Days</span>
+                    </div>
+                    <field name="payment_behavior" widget="badge"
+                        decoration-danger="payment_behavior == 'delay'"
+                        decoration-success="payment_behavior == 'on_time'" attrs="{'invisible':['|',('move_type','!=','out_invoice'),('payment_state','not in',('paid','in_payment'))]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Invoice Tree View with Payment Behavior -->
+        <record id="account_move_view_tree_inherit_payment_behavior" model="ir.ui.view">
+            <field name="name">account.move.view.tree.inherit.payment.behavior</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="decoration-success">payment_behavior == 'on_time'</attribute>
+                    <attribute name="decoration-warning">payment_behavior == 'delay'</attribute>
+                    <attribute name="decoration-muted">payment_behavior == 'not_paid'</attribute>
+                </xpath>
+                <field name="invoice_date_due" position="after">
+                    <field name="invoice_net_date_due" attrs="{'invisible': [('move_type', '!=', 'out_invoice')]}" optional="show"/>
+                </field>
+
+                <field name="payment_state" position="after">
+                    <field name="payment_date" optional="hide"/>
+                    <field name="payment_behavior" widget="badge"
+                        decoration-danger="payment_behavior == 'delay'"
+                        decoration-success="payment_behavior == 'on_time'"/>
+                    <field name="days_to_pay" optional="hide"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Search view for payment behavior filtering -->
+        <record id="view_account_invoice_payment_behavior_filter" model="ir.ui.view">
+            <field name="name">account.move.payment.behavior.search</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='late']" position="after">
+                    <separator/>
+                    <filter string="Paid On Time" name="paid_on_time" domain="[('payment_behavior', '=', 'on_time')]"/>
+                    <filter string="Paid with Delay" name="paid_delay" domain="[('payment_behavior', '=', 'delay')]"/>
+                </xpath>
+                <xpath expr="//group" position="inside">
+                    <separator/>
+                    <filter string="Payment Behavior" name="group_payment_behavior" domain="[]" context="{'group_by': 'payment_behavior'}"/>
+                </xpath>
+                <xpath expr="//filter[@name='due_date']" position="after">
+                    <filter name="group_payment_date" string="Payment Date" date="payment_date"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

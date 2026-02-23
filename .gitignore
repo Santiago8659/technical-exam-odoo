@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes (data persisted in containers)
+docker/data/
+
+# Environment overrides
+docker/.env.local
+
+# Evaluation rubric (internal only, DO NOT share with candidates)
+docs/EVALUATION_RUBRIC.md
+
+# Data generation scripts (internal only)
+scripts/generate_test_data.py
+scripts/generate_extra_data.py

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_res_partner_credit_score_tree" model="ir.ui.view">
+        <field name="name">res.partner.credit.score.tree</field>
+        <field name="model">res.partner.credit.score</field>
+        <field name="arch" type="xml">
+            <tree string="Credit Scores" >
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="total_score"/>
+                <field name="dso" optional="show"/>
+                <field name="ar_balance" optional="hide"/>
+                <field name="is_black_list"/>
+                <field name="score_category" widget="badge"
+                    decoration-success="score_category == 'excellent'"
+                    decoration-info="score_category == 'good'"
+                    decoration-warning="score_category == 'fair'"
+                    decoration-danger="score_category in ['poor','very_poor']"/>
+                <field name="credit_score_trend"
+                    widget="badge"
+                    decoration-success="credit_score_trend == 'improving'"
+                    decoration-warning="credit_score_trend == 'stable'"
+                    decoration-danger="credit_score_trend == 'deteriorating'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_res_partner_credit_score_form" model="ir.ui.view">
+        <field name="name">res.partner.credit.score.form</field>
+        <field name="model">res.partner.credit.score</field>
+        <field name="arch" type="xml">
+            <form string="Credit Score">
+                <header>
+                    <button name="action_recalculate_score" type="object" string="Recalculate Score" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="partner_id"/>
+                        <h1>
+                            <field name="partner_id" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <label for="month" string="Date"/>
+                            <div class="o_row">
+                                <field name="month"/>
+                                <field name="year"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Score Details">
+                            <group>
+                                <group name="score_components">
+                                    <field name="payment_behavior_score"/>
+                                    <field name="payment_timing_score"/>
+                                    <field name="credit_history_score"/>
+                                    <field name="financial_capacity_score"/>
+                                </group>
+                                <group name="score_summary">
+                                    <field name="total_score"/>
+                                    <field name="score_category" widget="badge"
+                                        decoration-success="score_category == 'excellent'"
+                                        decoration-info="score_category == 'good'"
+                                        decoration-warning="score_category == 'fair'"
+                                        decoration-danger="score_category in ['poor','very_poor']"/>
+                                    <field name="credit_score_trend"
+                                        widget="badge"
+                                        decoration-success="credit_score_trend == 'improving'"
+                                        decoration-warning="credit_score_trend == 'stable'"
+                                        decoration-danger="credit_score_trend == 'deteriorating'"/>
+                                    <field name="is_black_list"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="AR Metrics">
+                            <group>
+                                <group string="Key Indicators">
+                                    <field name="dso"/>
+                                    <field name="dbt"/>
+                                    <field name="ar_balance"/>
+                                    <field name="total_revenue"/>
+                                </group>
+                                <group string="Invoice Aging Distribution">
+                                    <field name="aging_current"/>
+                                    <field name="aging_1_30"/>
+                                    <field name="aging_31_60"/>
+                                    <field name="aging_61_90"/>
+                                    <field name="aging_90_plus"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Risk Analysis">
+                            <group>
+                                <field name="risk_alerts" nolabel="1" placeholder="Risk alerts and observations..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_res_partner_credit_score_search" model="ir.ui.view">
+        <field name="name">res.partner.credit.score.search</field>
+        <field name="model">res.partner.credit.score</field>
+        <field name="arch" type="xml">
+            <search string="Credit Scores">
+                <field name="partner_id"/>
+
+                <filter string="This Month" name="filter_this_month" domain="[('month', '=', context_today().month), ('year', '=', context_today().year)]"/>
+                <separator/>
+                <filter string="Date" name="filter_date" date="date"/>
+                <separator/>
+                <filter string="Excellent" name="filter_excellent" domain="[('score_category', '=', 'excellent')]"/>
+                <filter string="Good" name="filter_good" domain="[('score_category', '=', 'good')]"/>
+                <filter string="Fair" name="filter_fair" domain="[('score_category', '=', 'fair')]"/>
+                <filter string="Poor" name="filter_poor" domain="[('score_category', '=', 'poor')]"/>
+                <filter string="Very Poor" name="filter_very_poor" domain="[('score_category', '=', 'very_poor')]"/>
+                <separator/>
+                <filter string="Black Listed" name="filter_blacklisted" domain="[('is_black_list', '=', True)]"/>
+                <filter string="Not Black Listed" name="filter_not_blacklisted" domain="[('is_black_list', '=', False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <separator/>
+                    <filter string="Score Category" name="group_category" context="{'group_by': 'score_category'}"/>
+                    <separator/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action Window -->
+    <record id="action_credit_score" model="ir.actions.act_window">
+        <field name="name">Credit Scores</field>
+        <field name="res_model">res.partner.credit.score</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_res_partner_credit_score_tree"/>
+        <field name="context">{'default_filter_this_month': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new credit score record!
+            </p>
+            <p>
+                Credit scores help you track and analyze your partners' payment behavior and creditworthiness over time.
+            </p>
+        </field>
+    </record>
+
+</odoo>

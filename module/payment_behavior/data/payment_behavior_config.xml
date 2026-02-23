@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Configuration parameters for payment behavior analysis -->
+        <record id="months_payment_behavior_analysis" model="ir.config_parameter">
+            <field name="key">payment_behavior.months_payment_behavior_analysis</field>
+            <field name="value">6</field>
+        </record>
+
+        <record id="grace_days_payment" model="ir.config_parameter">
+            <field name="key">payment_behavior.grace_days_payment</field>
+            <field name="value">10</field>
+        </record>
+
+        <record id="penalty_days_payment" model="ir.config_parameter">
+            <field name="key">payment_behavior.penalty_days_payment</field>
+            <field name="value">30</field>
+        </record>
+    </data>
+</odoo>

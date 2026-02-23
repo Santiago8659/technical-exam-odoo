@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<odoo>
+    <data>
+        <record id="res_partner_form_view_inherit_payment_behavior" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit.payment.behavior</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='sales_purchases']" position="after">
+                    <page name="payment_behavior" string="Payment Behavior">
+                        <div attrs="{'invisible': [('parent_id', '=', False)]}">
+                            <p>Payment behavior are displayed only on <button name="open_commercial_entity"
+                                type="object"
+                                string="the parent company"
+                                class="oe_link"/>
+                            </p>
+                        </div>
+                        <group attrs="{'invisible': [('parent_id', '!=', False)]}">
+                            <group string="Payment Behavior" name="payment_behavior_info">
+                                <label for="average_pay_time"/>
+                                <div class="o_row">
+                                    <field name="average_pay_time"/>
+                                    <span class="oe_read_only"> Days in <field name="config_months_analysis" /> Months(<field name="count_total_invoices_paid"/>)/</span>
+                                    <field name="average_pay_time_total"/>
+                                    <span class="oe_read_only">Days in Total Months(<field name="count_total_invoices_paid_total"/>)</span>
+                                </div>
+                                <label for="percentage_invoices_on_time"/>
+                                <div class="o_row">
+                                    <field name="percentage_invoices_on_time" widget="percentage"/>
+                                    <span class="oe_read_only"> - </span>
+                                    <field name="count_total_invoices_paid_on_time"/>
+                                    <span class="oe_read_only"> On time / </span>
+                                    <field name="count_total_invoices_paid"/>
+                                    <span class="oe_read_only"> Paid </span>
+                                    <button name="show_invoices" icon="fa-eye" type="object" help="View the paid invoices" class="btn-link mb-1 px-0"/>
+                                </div>
+                                <field name="payment_behavior_rating" widget="badge"
+                                    decoration-success="payment_behavior_rating == 'excellent'"
+                                    decoration-info="payment_behavior_rating == 'good'"
+                                    decoration-warning="payment_behavior_rating == 'fair'"
+                                    decoration-danger="payment_behavior_rating in ['poor', 'very_poor']"/>
+                                <field name="payment_status" widget="badge"
+                                    decoration-success="payment_status == 'settled'"
+                                    decoration-info="payment_status == 'current'"
+                                    decoration-danger="payment_status == 'overdue'"/>
+                                <field name="is_black_list"/>
+                            </group>
+                            <group string="Credit Score">
+                                <button name="action_view_all_credit_score" icon="fa-plus" class="btn-link mb-1 px-0" string="View credit score history" type="object" help="View the partner's credit score history"/>
+                                <field name="last_credit_score_id" invisible="1"/>
+                                <field name="credit_score"/>
+                                <field name="credit_score_category" widget="badge"
+                                    decoration-success="credit_score_category == 'excellent'"
+                                    decoration-info="credit_score_category == 'good'"
+                                    decoration-warning="credit_score_category == 'fair'"
+                                    decoration-danger="credit_score_category in ['poor','very_poor']"/>
+                                <field name="credit_score_trend" widget="badge"
+                                        decoration-success="credit_score_trend == 'improving'"
+                                        decoration-danger="credit_score_trend == 'deteriorating'"/>
+                            </group>
+                        </group>
+
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- tree view -->
+        <record id="res_partner_view_tree_inherit_payment_behavior" model="ir.ui.view">
+            <field name="name">res.partner.view.tree.inherit.payment.behavior</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='active']" position="after">
+                    <field name="average_pay_time" optional="hide"/>
+                    <field name="percentage_invoices_on_time" widget="percentage" optional="hide"/>
+                    <field name="payment_behavior_rating" widget="badge" optional="hide"
+                           decoration-success="payment_behavior_rating == 'excellent'"
+                           decoration-info="payment_behavior_rating == 'good'"
+                           decoration-warning="payment_behavior_rating == 'fair'"
+                           decoration-danger="payment_behavior_rating in ['poor', 'very_poor']"/>
+                    <field name="payment_status" widget="badge" optional="show"
+                           decoration-success="payment_status == 'settled'"
+                           decoration-info="payment_status == 'current'"
+                           decoration-danger="payment_status == 'overdue'"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="res_partner_view_search_payment_behavior" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit.payment.behavior</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter" />
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='inactive']" position="before">
+                <filter string="Black List" name="black_list_filter" domain="[('is_black_list', '=', True)]"/>
+                <separator/>
+                <filter string="Current" name="payment_status_current" domain="[('payment_status', '=', 'current')]"/>
+                <filter string="Overdue" name="payment_status_overdue" domain="[('payment_status', '=', 'overdue')]"/>
+                <filter string="Settled" name="payment_status_settled" domain="[('payment_status', '=', 'settled')]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+    </data>
+</odoo>

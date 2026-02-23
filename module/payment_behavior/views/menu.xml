@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu for Credit Scores -->
+    <menuitem
+        name="Credit Scores"
+        id="menu_credit_scores"
+        parent="contacts.res_partner_menu_config"
+        action="action_credit_score"
+        sequence="20"/>
+
+</odoo>

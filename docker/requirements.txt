@@ -1,0 +1,9 @@
+requests==2.22.0
+pandas==0.25.3
+Pillow==7.1.0
+reportlab==3.5.34
+gevent==1.5.0 ; python_version == '3.7'
+Jinja2==2.10.1; python_version < '3.8'
+python-stdnum==1.8.1
+Werkzeug==0.16.1
+num2words==0.5.6
