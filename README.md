@@ -114,13 +114,13 @@ El error ocurre porque Odoo intenta calcular los campos `payment_status` y `paym
 **Prioridad:** Alta
 
 **Descripcion:**
-El campo `percentage_invoices_on_time` muestra valores absurdos para los partners. Por ejemplo, un partner que paga 100% a tiempo muestra un porcentaje de 49.0 (4900%) en vez de 1.0 (100%). Otro partner con 3 de 5 facturas a tiempo muestra 15.0 (1500%) en vez de 0.6 (60%), y su rating dice "Excellent" cuando deberia ser "Fair".
+El campo `percentage_invoices_on_time` muestra valores absurdos para los partners. Por ejemplo, "Drogueria Mixta SA" con 3 de 5 facturas a tiempo muestra 15.0 (1500%) en vez de 0.6 (60%), y su rating dice "Excellent" cuando deberia ser "Fair". Otro partner "Farmacia Nueva Express" con 4 de 4 facturas a tiempo muestra 16.0 en vez de 1.0.
 
 **Pasos para reproducir:**
-1. Ir a Contactos > "Distribuidora El Buen Pago SAS"
+1. Ir a Contactos > "Drogueria Mixta SA"
 2. Abrir la pestana "Payment Behavior"
-3. Observar que el % muestra 49.0 en vez de 1.0
-4. Verificar "Drogueria Mixta SA": muestra 15.0 en vez de 0.6, rating incorrecto
+3. Observar que el % muestra 15.0 en vez de 0.6, rating dice "Excellent" en vez de "Fair"
+4. Verificar "Farmacia Nueva Express": muestra 16.0 en vez de 1.0
 
 **Pista:** El problema esta en el metodo `_calculate_partner_payment_metrics` de `res_partner.py`. Revisa la formula de calculo del porcentaje.
 
