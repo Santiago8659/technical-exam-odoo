@@ -240,15 +240,7 @@ Al finalizar, entregar:
 
 ---
 
-## Criterios de Evaluacion
+## Notas Finales
 
-| Criterio | Peso |
-|----------|------|
-| Bugs encontrados y correctamente solucionados | 35% |
-| Calidad de la solucion (codigo limpio, patrones Odoo) | 20% |
-| Nueva funcionalidad implementada | 15% |
-| Code review (identificacion de problemas) | 15% |
-| Uso efectivo de herramientas AI | 10% |
-| Documentacion y comunicacion | 5% |
-
-**Nota:** Se espera que uses herramientas de IA para ser mas productivo, no para que hagan todo por ti. En la defensa oral se preguntara sobre decisiones tecnicas y se verificara comprension del codigo.
+- Se espera que uses herramientas de IA para ser mas productivo, no para que hagan todo por ti.
+- Se valorara la calidad del codigo, el uso de patrones Odoo y la documentacion clara.
