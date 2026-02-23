@@ -24,8 +24,9 @@ docker/data/
 # Environment overrides
 docker/.env.local
 
-# Evaluation rubric (internal only, DO NOT share with candidates)
+# Internal documents (DO NOT share with candidates)
 docs/EVALUATION_RUBRIC.md
+docs/INSTRUCCIONES_TALENTO_HUMANO.md
 
 # Data generation scripts (internal only)
 scripts/generate_test_data.py
