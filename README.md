@@ -3,7 +3,7 @@
 **Empresa:** M&S VITAMINS SAS
 **Modulo:** Payment Behavior (Odoo 14)
 **Duracion:** 2 horas maximo
-**Herramientas permitidas:** Claude Code, Copilot, ChatGPT, documentacion online, etc.
+**Herramientas permitidas:** Documentacion oficial de Odoo, referencias tecnicas online
 
 ---
 
@@ -242,5 +242,4 @@ Al finalizar, entregar:
 
 ## Notas Finales
 
-- Se espera que uses herramientas de IA para ser mas productivo, no para que hagan todo por ti.
 - Se valorara la calidad del codigo, el uso de patrones Odoo y la documentacion clara.
