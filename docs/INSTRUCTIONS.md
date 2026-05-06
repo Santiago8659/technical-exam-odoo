@@ -3,19 +3,22 @@
 **Empresa:** M&S VITAMINS SAS
 **Modulo:** Payment Behavior (Odoo 14)
 **Duracion:** 2 horas maximo
-**Herramientas permitidas:** Claude Code, Copilot, ChatGPT, documentacion online, etc.
+**Herramientas permitidas:** Documentacion oficial de Odoo, Stack Overflow, modulos OCA/enterprise como referencia, tu IDE.
+**Herramientas NO permitidas:** Claude Code, Copilot, ChatGPT, Cursor AI, Gemini, ni ningun asistente de IA generativa.
+
+> **Por que sin IA?** No es desconfianza. En M&S Vitamins ya usamos IA intensivamente y la mayoria del codigo se escribe asistido. Pero precisamente por eso necesitamos que el desarrollador detras del prompt tenga criterio propio para auditar, redirigir y validar lo que la IA produce. Esta prueba mide exactamente eso.
+>
+> Hay un principio bien establecido en ingenieria de software: *"It's harder to read code than to write it"* (Joel Spolsky). Y otro: *"Debugging is twice as hard as writing the code in the first place"* (Brian Kernighan). Esta prueba te pone en esa situacion — leer codigo ajeno, entender que falla, y proponer que se puede mejorar — que es la tarea mas dificil y mas valiosa que hace un desarrollador senior.
 
 ---
 
-## Contexto
+## Sobre la empresa
 
-Eres un nuevo desarrollador en M&S VITAMINS. Tu primer dia recibes varios tickets de soporte relacionados con el modulo **Payment Behavior**, que analiza el comportamiento de pago de los clientes.
+**M&S Vitamins** es una distribuidora de vitaminas y suplementos y fabricante de alimentos en Colombia. Operamos en B2B y B2C: nuestros clientes son drogueras, farmacias y mayoristas tanto como clientes finales a traves de ecommerce. Mas de 50.000 partners activos en el ERP.
 
-El modulo:
-- Calcula metricas de pago por partner (promedio de dias, % a tiempo, rating)
-- Genera credit scores mensuales
-- Detecta clientes morosos (blacklist)
-- Se actualiza en tiempo real (hook de reconciliacion) y por cron diario (batch SQL)
+El area de **Cartera** gestiona el cobro y el riesgo de credito de esa base de clientes. Su trabajo depende de tener informacion precisa y actualizada sobre como paga cada cliente: si paga a tiempo, con que frecuencia se atrasa, si esta en mora activa. Con esa informacion toman decisiones sobre cupos, condiciones de pago y gestion de cobro.
+
+El modulo sobre el que vas a trabajar vive en esa interseccion: datos de facturacion, comportamiento de pago, y las decisiones que Cartera toma con esa informacion todos los dias.
 
 ---
 
@@ -48,10 +51,11 @@ docker-compose up -d
 
 ## PARTE 1: Tickets de Soporte (60 min)
 
-Resuelve los siguientes tickets. Para cada uno:
-1. Identifica la causa raiz
-2. Implementa la solucion
-3. Documenta brevemente que hiciste y por que
+Resuelve los siguientes tickets. Para cada uno entrega:
+
+1. **Causa raiz** — una frase explicando que esta mal y por que.
+2. **Solucion** — el codigo del fix.
+3. **Impacto en negocio** — que equipo se ve afectado y que decision toma mal mientras el bug persiste (una frase).
 
 ### TICKET #1: "Dias de pago incorrectos en facturas con pagos parciales"
 
@@ -67,7 +71,7 @@ Cuando una factura se paga en multiples cuotas (ej: 50% el dia 10 y 50% el dia 2
 3. Registrar el pago restante (50%) el 2025-01-28
 4. Observar que "Days to Pay" muestra 14 dias en vez de 27
 
-**Impacto:** Las metricas de comportamiento de pago son incorrectas para clientes que pagan en cuotas.
+**Contexto de negocio:** Los clientes que pagan en cuotas representan buena parte de la cartera B2B. Si Days to Pay se mide desde el primer pago parcial, el rating y el credit score quedan artificialmente inflados o desinflados.
 
 ---
 
@@ -88,6 +92,8 @@ Despues de registrar un pago y reconciliarlo con una factura, las metricas del p
 
 **Esperado:** Las metricas deberian actualizarse inmediatamente despues de reconciliar un pago.
 
+**Contexto de negocio:** Comercial revisa el rating antes de aprobar un pedido grande. Si acaban de registrar el pago de una deuda vencida pero el rating todavia dice "Very Poor", pueden bloquear un pedido que ya no deberia estar bloqueado.
+
 ---
 
 ### TICKET #3: "Timeout al actualizar modulo en produccion"
@@ -101,10 +107,12 @@ Al hacer upgrade del modulo en la base de datos de produccion (que tiene +50,000
 El error ocurre porque Odoo intenta calcular los campos `payment_status` y `payment_behavior_rating` para TODOS los partners existentes al mismo tiempo durante la instalacion.
 
 **Contexto tecnico:**
-- En Odoo, cuando se agrega un campo `stored computed` o un campo `Selection` con `store=True` a un modelo existente, el sistema intenta computar/inicializar el valor para todos los registros existentes
-- Esto causa un problema masivo de rendimiento con +50,000 registros
+- En Odoo, cuando se agrega un campo `stored computed` o un campo `Selection` con `store=True` a un modelo existente, el sistema intenta computar/inicializar el valor para todos los registros existentes.
+- Esto causa un problema masivo de rendimiento con +50,000 registros.
 
 **Pista:** Investiga como otros modulos de Odoo manejan la inicializacion de columnas con `_auto_init()` y funciones de `odoo.tools.sql`.
+
+**Contexto de negocio:** Un timeout en upgrade deja el ERP inaccesible durante la ventana de mantenimiento, impactando facturacion, despachos y cartera en tiempo real.
 
 ---
 
@@ -114,7 +122,7 @@ El error ocurre porque Odoo intenta calcular los campos `payment_status` y `paym
 **Prioridad:** Alta
 
 **Descripcion:**
-El campo `percentage_invoices_on_time` muestra valores absurdos para los partners. Por ejemplo, "Drogueria Mixta SA" con 3 de 5 facturas a tiempo muestra 15.0 (1500%) en vez de 0.6 (60%), y su rating dice "Excellent" cuando deberia ser "Fair". Otro partner "Farmacia Nueva Express" con 4 de 4 facturas a tiempo muestra 16.0 en vez de 1.0.
+El campo `percentage_invoices_on_time` muestra valores absurdos. Por ejemplo, "Drogueria Mixta SA" con 3 de 5 facturas a tiempo muestra 15.0 (1500%) en vez de 0.6 (60%), y su rating dice "Excellent" cuando deberia ser "Fair". Otro partner "Farmacia Nueva Express" con 4 de 4 facturas a tiempo muestra 16.0 en vez de 1.0.
 
 **Pasos para reproducir:**
 1. Ir a Contactos > "Drogueria Mixta SA"
@@ -123,6 +131,8 @@ El campo `percentage_invoices_on_time` muestra valores absurdos para los partner
 4. Verificar "Farmacia Nueva Express": muestra 16.0 en vez de 1.0
 
 **Pista:** El problema esta en el metodo `_calculate_partner_payment_metrics` de `res_partner.py`. Revisa la formula de calculo del porcentaje.
+
+**Contexto de negocio:** Con ratings invertidos, Cartera no gestiona a los clientes realmente malos y Comercial da cupos a quienes no los merecen.
 
 ---
 
@@ -141,6 +151,8 @@ El campo `credit_score_trend` de los credit scores de Enero siempre muestra "No 
 
 **Pista:** Revisa la logica de `_compute_credit_score_trend` en `credit_score.py`. Que pasa cuando el mes actual es 1 (Enero)?
 
+**Contexto de negocio:** Enero es el mes de revision anual de cupos. Con el trend roto, Riesgo no tiene comparativo del diciembre anterior — el mes de mayor volumen del anio.
+
 ---
 
 ### TICKET #6: "Credit scores dan resultados inconsistentes"
@@ -152,17 +164,19 @@ El campo `credit_score_trend` de los credit scores de Enero siempre muestra "No 
 Los credit scores no reflejan correctamente el comportamiento de pago. Un partner que paga el 95% de sus facturas a tiempo deberia tener un score alto, pero el score total sale mas bajo de lo esperado. Parece que los pesos de los componentes estan invertidos.
 
 **Contexto del negocio:**
-- El **Payment Behavior Score** (% de facturas a tiempo) deberia tener el MAYOR peso (60%) porque es el indicador mas directo de confiabilidad
-- El **Payment Timing Score** (velocidad promedio de pago) deberia tener peso secundario (40%)
+- El **Payment Behavior Score** (% de facturas a tiempo) deberia tener el MAYOR peso (60%) porque es el indicador mas directo de confiabilidad.
+- El **Payment Timing Score** (velocidad promedio de pago) deberia tener peso secundario (40%).
 
 **Pasos para reproducir:**
 1. Tomar un partner con payment_behavior_score = 100 y payment_timing_score = 50
 2. Calcular manualmente: (100 * 0.6) + (50 * 0.4) = 80 (deberia ser "Excellent")
 3. Pero el sistema calcula: (100 * ?) + (50 * ?) = resultado diferente
 
+**Contexto de negocio:** El score total es lo que Finanzas reporta a gerencia. Si los pesos estan al reves, el reporte pierde credibilidad ante la junta.
+
 ---
 
-## PARTE 2: Nueva Funcionalidad (40 min)
+## PARTE 2: Nueva Funcionalidad (30 min)
 
 ### Feature: Agregar boton "Recalculate Payment Behavior" en la vista de facturas
 
@@ -182,7 +196,7 @@ Agregar un boton en el formulario de factura (account.move) que permita recalcul
 
 ---
 
-## PARTE 3: Code Review (20 min)
+## PARTE 3: Code Review (15 min)
 
 Revisa el siguiente fragmento de codigo (hipotetico) que un companero quiere agregar al modulo. Identifica problemas y sugiere mejoras:
 
@@ -220,27 +234,47 @@ class ResPartner(models.Model):
             )
 ```
 
-**Preguntas para el candidato:**
-1. Identifica al menos 3 problemas o mejoras en este codigo
+**Preguntas:**
+1. Identifica al menos 3 problemas o mejoras en este codigo.
 2. Que impacto tendria en produccion agregar el campo `risk_level` con `store=True` y `@api.depends`?
 3. Que esta mal con el `message_post` en el contexto de Odoo i18n?
 4. Como manejarias el envio masivo de emails para +50,000 partners?
 
 ---
 
-## Entrega
+## PARTE 4: Si fuera tu modulo, que le mejorarias? (15 min)
 
-Al finalizar, entregar:
-1. Los archivos modificados (o un diff/patch)
-2. Un documento breve (puede ser un .md o .txt) explicando:
-   - Que bugs encontraste y como los solucionaste
-   - Tu enfoque para la nueva funcionalidad
-   - Tu analisis del code review
-3. Cualquier nota adicional sobre decisiones de diseno
+Despues de haber instalado, leido y arreglado el modulo, propon **entre 1 y 3 mejoras concretas**, con esta estructura para cada una:
+
+- **Que** — descripcion en una o dos frases.
+- **Por que** — que problema de negocio resuelve, a quien beneficia, que decision habilita.
+- **Como** — sketch de implementacion (modelo, campo, cron, integracion, dashboard, etc.). Sin codigo, solo el enfoque.
+- **Riesgo** — que tendrias que cuidar al implementarlo.
+
+No buscamos la respuesta correcta. Buscamos que veas oportunidades de negocio en el codigo y propongas algo materializable. Una propuesta bien fundamentada vale mas que tres genericas.
+
+Si no se te ocurre nada con suficiente fundamento, escribe exactamente eso. Es una respuesta valida.
 
 ---
 
-## Notas Finales
+## Entrega
 
-- Se espera que uses herramientas de IA para ser mas productivo, no para que hagan todo por ti.
-- Se valorara la calidad del codigo, el uso de patrones Odoo y la documentacion clara.
+Al finalizar, entregar:
+
+1. **Los archivos modificados** (o un diff/patch).
+2. **Un documento** (markdown o txt) con:
+   - Por cada ticket: causa raiz + solucion + impacto en negocio.
+   - Tu enfoque para la nueva funcionalidad.
+   - Tu analisis del code review con respuestas a las 4 preguntas.
+   - Tus propuestas de mejora (Parte 4) con la estructura pedida.
+3. **Notas adicionales** sobre decisiones de diseno o trade-offs, si las hay.
+
+---
+
+## Notas finales
+
+- **Tiempo**: 2 horas. Si no alcanzas todo, entrega lo que tengas. Tres tickets bien resueltos con contexto de negocio pesan mas que seis resueltos a medias.
+- **Sin IA generativa**: puedes buscar documentacion, leer codigo OCA como referencia, consultar Stack Overflow. Lo que no puedes es pedirle a un LLM que resuelva los tickets por ti.
+- **Honestidad sobre lo que no sabes**: si no encuentras la causa raiz de un ticket, documenta hasta donde llegaste y que hipotesis tienes. Eso tambien se evalua.
+- **No refactorices lo que no esta roto**: cada fix debe ser quirurgico. Si tu diff tiene cambios que ningun ticket menciona, explica por que.
+- **Lo que mas valoramos**: que entiendas para que sirve lo que estas arreglando, no solo que lo arregles.

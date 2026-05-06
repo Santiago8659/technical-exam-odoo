@@ -27,6 +27,10 @@ docker/.env.local
 # Internal documents (DO NOT share with candidates)
 docs/EVALUATION_RUBRIC.md
 docs/INSTRUCCIONES_TALENTO_HUMANO.md
+docs/GUIA_ENTREVISTA_DEFENSA_ORAL.md
+
+# Candidate submissions (local review only)
+Pruebas/
 
 # Data generation scripts (internal only)
 scripts/generate_test_data.py
