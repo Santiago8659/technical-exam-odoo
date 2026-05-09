@@ -127,7 +127,7 @@ class AccountMove(models.Model):
 
                         if payment_dates:
                             # Get the last payment date
-                            last_payment_date = min(payment_dates).date()
+                            last_payment_date = max(payment_dates).date()
 
                             # Calculate days to pay from invoice date
                             days_to_pay = int((last_payment_date - invoice_date).days)
